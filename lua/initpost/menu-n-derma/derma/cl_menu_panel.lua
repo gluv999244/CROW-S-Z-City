@@ -7,7 +7,7 @@ local Selects = {
     {Title = "Disconnect", Func = function(luaMenu) RunConsoleCommand("disconnect") end},
     {Title = "Main Menu", Func = function(luaMenu) gui.ActivateGameUI() luaMenu:Close() end},
     {Title = "Settings", Func = function(luaMenu) luaMenu:Close() RunConsoleCommand("hg_settings") end},
-    {Title = "Discord", Func = function(luaMenu) luaMenu:Close() gui.OpenURL("https://discord.gg/475EmEdTgH")  end},
+    {Title = "Discord", Func = function(luaMenu) luaMenu:Close() gui.OpenURL("https://discord.gg/Gdc9npPFWb")  end},
     --{Title = "How to play", Func = function(luaMenu) gui.OpenURL("http://zcity-help.ru/zcity_wiki.htm?") end},
     --{Title = "Wiki/Rules", Func = function(luaMenu) luaMenu:Close() gui.OpenURL("http://zcity-help.ru") end},
     {Title = "Achievements", Func = function(luaMenu) luaMenu:Close() RunConsoleCommand("hg_achievements") end},
@@ -104,7 +104,7 @@ function PANEL:InitializeMarkup()
         return markup.Parse(text)
     end
 
-    local text = "<font=ZC_MM_Title><colour=255,15,15,255>Z</colour>-City</font>\n<font=ZCity_Small>" .. gm .. "</font>"
+    local text = "<font=ZC_MM_Title><colour=15,255,255,255>Crow's Z</colour>-City</font>\n<font=ZCity_Small>" .. gm .. "</font>"
     return markup.Parse(text)
 end
 
