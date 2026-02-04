@@ -1,6 +1,6 @@
 hg = hg or {}
 hg.Version = "Release 1.02"
-hg.GitHub_ReposOwner = "uzelezz123"
+hg.GitHub_ReposOwner = "CROW" --crow why didn't you edit this you piece of garbage!!!
 hg.GitHub_ReposName = "Z-City" -- please add your real git fork!
 
 if SERVER then
@@ -9,6 +9,9 @@ if SERVER then
 	resource.AddWorkshop("3657294321") -- first content addon
 	resource.AddWorkshop("3544105055") -- second content addon
 	resource.AddWorkshop("3257937532") -- distac content
+	resource.AddWorkshop("3597480306") -- appetite for destruction one
+	resource.AddWorkshop("3598282322") -- appetite for destruction two
+	resource.AddWorkshop("3607888938") -- appetite for destruction three (thx barsik!!)
 end
 -- if hg.GitHub_ReposOwner and hg.GitHub_ReposOwner != "" then
 -- 	http.Fetch( "https://api.github.com/repos/" .. hg.GitHub_ReposOwner .. "/" .. hg.GitHub_ReposName .. "/commits?sha=" .. hg.GitHub_Branch .. "&per_page=1",
