@@ -139,6 +139,8 @@ end
 hook.Add("InitPostEntity", "zb_GetMaps", function()
     zb.votestarted = false
     getmaps()
+    zb.ClearRTVVotes()
+    zb.RTVAvailableAt = CurTime() + 240
 end)
 
 net.Receive("ZB_RockTheVote_vote", function(len, ply)
