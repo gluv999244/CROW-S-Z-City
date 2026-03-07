@@ -1566,7 +1566,8 @@ function hg.DragHands(ply,self)
 	local bon = ply:GetNetVar("carrybone",0) ~= 0 and ply:GetNetVar("carrybone",0) or ply:GetNetVar("carrybone2",0)
 	local lpos = IsValid(ent) and ply:GetNetVar("carrypos",nil) or ply:GetNetVar("carrypos2",nil)
 	--local twohands = (ply:GetNetVar("carrymass",0) ~= 0 and ply:GetNetVar("carrymass",0) or ply:GetNetVar("carrymass2",0)) > 15
-	local twohands = ply:GetNetVar("carrymass",0) > 15 or (!hg.CanUseLeftHand(ply) and ply:GetActiveWeapon():GetClass() == "weapon_hands_sh")
+	local wep = IsValid(ply:GetActiveWeapon()) and ply:GetActiveWeapon()
+	local twohands = ply:GetNetVar("carrymass",0) > 15 or (!hg.CanUseLeftHand(ply) and wep and wep:GetClass() == "weapon_hands_sh")
 
 	local norm
     local dist
@@ -1604,10 +1605,11 @@ function hg.DragHands(ply,self)
 	if pos then
         local dot = (pos - ply_spine_matrix:GetTranslation()):GetNormalized():Dot(eyetr.Normal:Angle():Right())
 
-		--!! трясет чета
-        hg.bone.Set(ply, "spine", vector_origin, Angle(0, 0, -dot * 25), "holding")
-        hg.bone.Set(ply, "spine2", vector_origin, Angle(0, 0, -dot * 25), "holding2")
-        hg.bone.Set(ply, "head", vector_origin, -Angle(0, 0, -dot * 50), "holding3")
+		if wep and not ishgweapon(wep) then -- ЮЗЛЕСС ПРАТСИИИИ ПРАСТИИИИИИИИ
+			hg.bone.Set(ply, "spine", vector_origin, Angle(0, 0, -dot * 20), "holding")
+			hg.bone.Set(ply, "spine2", vector_origin, Angle(0, 0, -dot * 25), "holding2")
+			hg.bone.Set(ply, "head", vector_origin, -Angle(0, 0, -dot * 30), "holding3")
+		end
         --надо тогда и на сервере делать, а то будет различаться --!! не так уж и сильно различается
 
 		--!! ломает аксесуары
