@@ -1422,7 +1422,8 @@ function SWEP:PrimaryAttack()
 
     if !self:InUse() then return end
     if (self:GetLastAttack() + self:GetAttackWait()) > CurTime() then return end
-    
+    if self.lastattack and (self.lastattack + self.attackwait) > CurTime() then return end
+
     local mul = 1 / math.Clamp((180 - self:GetOwner().organism.stamina[1]) / 90, 1, 2)
 
     
@@ -1437,7 +1438,8 @@ function SWEP:PrimaryAttack()
     self:SetAttackLength(self.AttackLen1)
     self:SetAttackWait(self.WaitTime1 / mul)
     self:SetInAttack(true)
-
+    self.lastattack = CurTime() + self.Attack2Time / mul
+    self.attackwait = self.WaitTime2 / mul
     if CLIENT and not self:IsLocal() and ply.AnimRestartGesture then
         self:GetOwner():AnimRestartGesture(GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_HL2MP_GESTURE_RANGE_ATTACK_SLAM, true)
     end
@@ -1520,7 +1522,7 @@ function SWEP:SecondaryAttack(override)
         
         return
     end
-
+    
     if not game.SinglePlayer() and not IsFirstTimePredicted() then return end
 
     local ent = hg.GetCurrentCharacter(ply)
@@ -1528,9 +1530,10 @@ function SWEP:SecondaryAttack(override)
     if !self:InUse() then return end
     if (hg.KeyDown(ply, IN_USE) and not IsValid(ply.FakeRagdoll)) then return end
     if (self:GetLastAttack() + self:GetAttackWait()) > CurTime() then return end
+    if self.lastattack and (self.lastattack + self.attackwait) > CurTime() then return end
 
     local mul = 1 / math.Clamp((180 - ply.organism.stamina[1]) / 90, 1, 2)
-
+    
     self.HitEnts = nil
     self.FirstAttackTick = false
     self.AttackHitPlayed = false
@@ -1538,11 +1541,13 @@ function SWEP:SecondaryAttack(override)
     self:PlayAnim("attack2",self.AnimTime2 / mul,false,nil,false,false)
     self:SetAttackType(2)
     self:SetLastAttack(CurTime() + self.Attack2Time / mul)
-    self:SetAttackTime( self:GetLastAttack() + (self.Attack2TimeLength / mul) )
+    self:SetAttackTime(self:GetLastAttack() + (self.Attack2TimeLength / mul) )
     self:SetAttackLength(self.AttackLen2)
     self:SetAttackWait(self.WaitTime2 / mul)
     self:SetInAttack(true)
-    
+    self.lastattack = CurTime() + self.Attack2Time / mul
+    self.attackwait = self.WaitTime2 / mul
+
     if CLIENT and not self:IsLocal() and ply.AnimRestartGesture then
         ply:AnimRestartGesture(GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_HL2MP_GESTURE_RANGE_ATTACK_SLAM, true)
     end
@@ -1650,11 +1655,11 @@ elseif CLIENT then
         local ent = net.ReadEntity()
         local sendtoclient = net.ReadBool()
 
-        if IsValid(ent) and ent.PlayAnim then
-            ent:PlayAnim(tbl.anim,tbl.time,tbl.cycling,tbl.callback,tbl.reverse)
-
-            if (tbl.anim == "attack" or tbl.anim == "attack2") and ent:GetOwner().AnimRestartGesture and IsValid(ent:GetOwner()) and not ent:GetOwner():IsWorld() then
-                if !ent:IsLocal() then
+        if ent.IsLocal and !ent:IsLocal() then
+            if IsValid(ent) and ent.PlayAnim then
+                ent:PlayAnim(tbl.anim,tbl.time,tbl.cycling,tbl.callback,tbl.reverse)
+                
+                if (tbl.anim == "attack" or tbl.anim == "attack2") and ent:GetOwner().AnimRestartGesture and IsValid(ent:GetOwner()) and not ent:GetOwner():IsWorld() then
                     ent:GetOwner():AnimRestartGesture(GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_HL2MP_GESTURE_RANGE_ATTACK_SLAM, true)
                 end
             end

@@ -57,6 +57,7 @@ hook.Add("InputMouseApply", "fakeCameraAngles", function(cmd, x, y, angle)
 		if !IsValid(lply.FakeRagdoll) then angle[1] = math.Clamp(angle[1], -89, 89) end
 		realangle = realangle + diff
 		diff = LerpAngleFT(0.01, diff, angle_zero)
+		diff.roll = LerpFT(0.1, diff.roll, 0)
 		cmd:SetViewAngles(angle)
 	else
 		cmd:SetViewAngles(angle)
