@@ -37,12 +37,12 @@ SWEP.basebone = 94
 
 SWEP.weaponPos = Vector(0,0,0)
 SWEP.weaponAng = Angle(0,-90,0)
-SWEP.HitPauseDelay = 0.5
-SWEP.HitPauseDuration = 0.3
-SWEP.HitReverseDuration = 0.6
 
 SWEP.DamagePrimary = 74
 SWEP.DamageSecondary = 34
+
+SWEP.BackHeadDamageMul = 1.6
+SWEP.BehindAttackMul = 1
 
 SWEP.PenetrationPrimary = 5
 SWEP.PenetrationSecondary = 7

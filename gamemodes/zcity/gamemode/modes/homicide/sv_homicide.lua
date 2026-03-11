@@ -245,6 +245,39 @@ util.AddNetworkString("HMCD(EndPlayersRoleSelection)")
 util.AddNetworkString("HMCD(SetSubRole)")
 util.AddNetworkString("hmcd_announce_traitor_lose")
 util.AddNetworkString("HMCD(CTRApply)")
+util.AddNetworkString("HMCD_TriggerKillEffect")
+
+local function HMCD_SendKillEffect(attacker, victim)
+	if not IsValid(attacker) or not attacker:IsPlayer() then return end
+	if IsValid(victim) and attacker == victim then return end
+
+	if math.random(100) > 15 then return end
+
+	if (attacker.hmcdKillFxNext or 0) > CurTime() then return end
+	attacker.hmcdKillFxNext = CurTime() + 1
+
+	net.Start("HMCD_TriggerKillEffect")
+	net.WriteUInt(math.random(1, 3), 2)
+	net.Send(attacker)
+end
+
+hook.Add("EntityTakeDamage", "HMCD_TriggerKillEffect", function(ent, dmgInfo)
+	local mode = CurrentRound()
+	if not mode or mode.name ~= "hmcd" then return end
+
+	if dmgInfo:GetDamage() <= 0 then return end
+
+	local attacker = dmgInfo:GetAttacker()
+	attacker = (hg.RagdollOwner and hg.RagdollOwner(attacker)) or attacker
+
+	local victim = ent
+	if IsValid(victim) and victim:IsRagdoll() then
+		victim = (hg.RagdollOwner and hg.RagdollOwner(victim)) or victim
+	end
+
+	if not IsValid(victim) or not victim:IsPlayer() then return end
+	HMCD_SendKillEffect(attacker, victim)
+end)
 
 local CTR_TOTAL_POINTS = 30
 local CTR_ITEMS = {
@@ -1629,6 +1662,8 @@ hook.Add("Player_Death", "HMCD_PlayerDeath", function(ply, _)
 				last_attacker = attacker
 			end
 		end
+
+		--HMCD_SendKillEffect(last_attacker, ply)
 		
 
 		if ply.isTraitor then

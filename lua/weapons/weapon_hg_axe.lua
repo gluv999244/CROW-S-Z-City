@@ -1,4 +1,4 @@
-﻿if SERVER then AddCSLuaFile() end
+if SERVER then AddCSLuaFile() end
 SWEP.Base = "weapon_melee"
 SWEP.PrintName = "Woodcutting axe"
 SWEP.Instructions = "An axe is an implement that has been used for millennia to shape, split, and cut wood. Can break down doors.\n\nLMB to attack.\nRMB to block."
@@ -58,6 +58,9 @@ SWEP.AnimList = {
 SWEP.DamageType = DMG_SLASH
 SWEP.DamagePrimary = 42
 SWEP.DamageSecondary = 14
+
+SWEP.BackHeadDamageMul = 2.3
+SWEP.BehindAttackMul = 1
 
 SWEP.PenetrationPrimary = 10
 SWEP.PenetrationSecondary = 3
