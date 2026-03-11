@@ -821,4 +821,3 @@ hook.Add("HUDPaint", "hg-aprilfools-fatman", function()
 	surface.DrawTexturedRect(x, y, targetW, targetH)
 	render.SetLightingMode(0)
 end)
-
