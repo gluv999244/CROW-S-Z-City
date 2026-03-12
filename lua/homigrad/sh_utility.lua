@@ -3072,6 +3072,62 @@ if SERVER then
 	end)
 end
 
+if SERVER then
+	local hg_badsun = CreateConVar("hg_badsun", "0", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Enable bad sun effect")
+	util.AddNetworkString("hg_sunburn_state")
+	util.AddNetworkString("hg_badsun_sound")
+	local sun_trace = {
+		mask = MASK_SOLID_BRUSHONLY
+	}
+	cvars.AddChangeCallback("hg_badsun", function(convar_name, old_value, new_value)
+		if tonumber(old_value) == tonumber(new_value) then return end
+		if tonumber(new_value) == 1 then
+			net.Start("hg_badsun_sound")
+			net.Broadcast()
+		end
+	end, "hg_badsun_sound_cb")
+
+	net.Receive("hg_sunburn_state", function(len, ply)
+		if not hg_badsun:GetBool() then return end
+		if not IsValid(ply) or not ply:Alive() then return end
+		if ply:WaterLevel() >= 2 then return end
+		local visible = net.ReadBool()
+		local dir = net.ReadVector()
+		local look = net.ReadFloat()
+		if not visible then return end
+		if not dir or dir:LengthSqr() < 0.0001 then return end
+		dir:Normalize()
+		local now = CurTime()
+		if (ply._sunburn_next or 0) > now then return end
+		ply._sunburn_next = now + 0.2
+		local eyePos = ply:EyePos()
+		sun_trace.start = eyePos
+		sun_trace.endpos = eyePos + dir * 100000
+		sun_trace.filter = ply
+		local tr = util.TraceLine(sun_trace)
+		if not tr.HitSky then return end
+		local dot = math.max(ply:EyeAngles():Forward():Dot(dir), 0)
+		local dmg = 18 + math.Clamp(dot, 0, 1) * 22
+		local info = DamageInfo()
+		info:SetAttacker(game.GetWorld())
+		info:SetInflictor(game.GetWorld())
+		info:SetDamage(dmg)
+		info:SetDamageType(DMG_BURN)
+		info:SetDamagePosition(eyePos)
+		ply:TakeDamageInfo(info)
+		if ply.organism then
+			ply.organism.painadd = (ply.organism.painadd or 0) + 25 * dot
+			ply.organism.lasthit = now
+		end
+	end)
+end
+
+if CLIENT then
+	net.Receive("hg_badsun_sound", function()
+		surface.PlaySound("badsun.wav")
+	end)
+end
+
 if CLIENT then
 	local dogConvars = {
 		"disable_spray",
