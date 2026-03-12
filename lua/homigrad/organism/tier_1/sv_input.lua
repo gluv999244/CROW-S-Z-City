@@ -956,6 +956,9 @@ hook.Add("EntityTakeDamage", "homigrad-damage", function(ent, dmgInfo)
 	local damageStack = dmg_before / (dmgInfo:IsDamageType(DMG_BULLET) and RagdollDamageBoneMul[hitgroup] or 1)
 	--print(damageStack, 3)
 	damageStack = damageStack * (dmgInfo:IsDamageType(DMG_BLAST) and 200 / lend or 1) * (!dmgInfo:IsDamageType(DMG_CLUB+DMG_SLASH+DMG_BULLET+DMG_BLAST+DMG_SNIPER) and 0 or 1)
+	if hitgroup == HITGROUP_HEAD and bit.band(dmgtype, DMG_CLUB + DMG_SLASH) > 0 and bit.band(dmgtype, DMG_BULLET + DMG_BUCKSHOT) == 0 then
+		damageStack = damageStack * 1.35
+	end
 	--damageStack = damageStack * (bullet and bullet.AmmoType and hg.ammotypeshuy[bullet.AmmoType] and hg.ammotypeshuy[bullet.AmmoType].BulletSettings and hg.ammotypeshuy[bullet.AmmoType].BulletSettings.Mass or 1) / 8
 	
 	org.dmgstack = org.dmgstack or {}
@@ -966,7 +969,10 @@ hook.Add("EntityTakeDamage", "homigrad-damage", function(ent, dmgInfo)
 	org.dmgstack[hitgroup][3] = (org.dmgstack[hitgroup][3] or 0) + damageStack / 500
 
 	local mat = ent:GetBoneMatrix(ent:TranslatePhysBoneToBone(bone))
-	local hitgroup_max = 100--hitgroup == HITGROUP_HEAD and 150 or 30
+	local hitgroup_max = 100
+	if hitgroup == HITGROUP_HEAD and bit.band(dmgtype, DMG_CLUB + DMG_SLASH) > 0 and bit.band(dmgtype, DMG_BULLET + DMG_BUCKSHOT) == 0 then
+		hitgroup_max = 130
+	end
 	local instant = org.dmgstack[hitgroup][1] > hitgroup_max
 	--print(damageStack, org.dmgstack[hitgroup][1], org.dmgstack[hitgroup][3])
 	local blast = dmgInfo:IsDamageType(DMG_BLAST)
