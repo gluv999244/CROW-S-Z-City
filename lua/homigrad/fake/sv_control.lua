@@ -740,7 +740,6 @@ hook.Add("Think", "Fake", function()
 			local org = choking1.organism
 			if org then
 				org.choking = true
-				org.choking_until = CurTime() + 0.25
 				if zb then
 					local dmgInfo = DamageInfo()
 					dmgInfo:SetAttacker(ply)

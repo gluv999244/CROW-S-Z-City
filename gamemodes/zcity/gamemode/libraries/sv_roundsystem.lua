@@ -291,13 +291,7 @@ function zb.GetAvailableModes()
 	for i, name in pairs(zb.GetModes()) do
 
 		local tbl = zb.modes[name]
-		local canlaunch = false
-		if tbl and tbl.CanLaunch then
-			local ok, result = pcall(tbl.CanLaunch, tbl)
-			canlaunch = ok and result and true or false
-		end
-
-		if canlaunch and
+		if (tbl.CanLaunch and tbl:CanLaunch()) and
 		(
 			( not tbl.ForBigMaps ) or
 			( zb.GetWorldSize() > ZBATTLE_BIGMAP )
@@ -468,13 +462,6 @@ end
 
 
 function zb.GetModesInfo()
-	local function CanLaunch(mode)
-		if not mode or not mode.CanLaunch then return false end
-		local ok, result = pcall(mode.CanLaunch, mode)
-		if not ok then return false end
-		return result and true or false
-	end
-
 	local modesInfo = {}
 
 	for name, mode in pairs(zb.modes) do
@@ -485,7 +472,7 @@ function zb.GetModesInfo()
 					name = (mode.PrintName or mode.name or name).."/"..name2,
 					description = mode.Description or "",
 					forBigMaps = mode.ForBigMaps or false,
-					canlaunch = (CanLaunch(mode) and 1 or 0)
+					canlaunch = (mode:CanLaunch() and 1 or 0)
 				})
 			end
 		else
@@ -494,7 +481,7 @@ function zb.GetModesInfo()
 				name = mode.PrintName or mode.name or name,
 				description = mode.Description or "",
 				forBigMaps = mode.ForBigMaps or false,
-				canlaunch = (CanLaunch(mode) and 1 or 0)
+				canlaunch = (mode:CanLaunch() and 1 or 0)
 			})
 		end
 	end
@@ -818,14 +805,8 @@ if SERVER then
 		local command = net.ReadString()
 		local modeKey = net.ReadString()
 		local addToQueue = net.ReadBool() or false
-		local mode = zb.modes[modeKey]
-		local canlaunch = false
-		if mode and mode.CanLaunch then
-			local ok, result = pcall(mode.CanLaunch, mode)
-			canlaunch = ok and result and true or false
-		end
 
-		if !(ply:IsSuperAdmin() or ply:IsAdmin()) and not canlaunch then
+		if !(ply:IsSuperAdmin() or ply:IsAdmin()) and not zb.modes[modeKey]:CanLaunch() then
 			ply:ChatPrint("This mode can't launch (No points or Is blocked): " .. modeKey)
 			return
 		end
