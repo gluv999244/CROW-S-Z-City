@@ -676,7 +676,7 @@ end
 hook.Add("HUDPaint", "SunCensor", function()
 	local lply = LocalPlayer()
 	if not IsValid(lply) then return end
-	if not GetConVar("hg_badsun") or not GetConVar("hg_badsun"):GetBool() then return end
+	if not (hg_BadSunEnabled and hg_BadSunEnabled()) then return end
 	local t = CurTime()
 	local pulse = 1 + math.sin(t * 2) * 0.06
 
@@ -704,7 +704,7 @@ local sun_force_next = 0
 hook.Add("CreateMove", "SunStare", function(cmd)
 	local lply = LocalPlayer()
 	if not IsValid(lply) or not lply:Alive() then return end
-	if not GetConVar("hg_badsun") or not GetConVar("hg_badsun"):GetBool() then return end
+	if not (hg_BadSunEnabled and hg_BadSunEnabled()) then return end
 	if lply:InVehicle() or lply:WaterLevel() >= 2 then return end
 	local sun = util.GetSunInfo()
 	if not sun or not sun.direction then return end

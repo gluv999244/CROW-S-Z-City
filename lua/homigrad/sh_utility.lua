@@ -3076,6 +3076,7 @@ if SERVER then
 	local hg_badsun = CreateConVar("hg_badsun", "0", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED, "Enable bad sun effect")
 	util.AddNetworkString("hg_sunburn_state")
 	util.AddNetworkString("hg_badsun_sound")
+	util.AddNetworkString("hg_badsun_state")
 	local sun_trace = {
 		mask = MASK_SOLID_BRUSHONLY
 	}
@@ -3085,7 +3086,16 @@ if SERVER then
 			net.Start("hg_badsun_sound")
 			net.Broadcast()
 		end
+		net.Start("hg_badsun_state")
+		net.WriteBool(tonumber(new_value) == 1)
+		net.Broadcast()
 	end, "hg_badsun_sound_cb")
+
+	hook.Add("PlayerInitialSpawn", "hg_badsun_sync", function(ply)
+		net.Start("hg_badsun_state")
+		net.WriteBool(hg_badsun:GetBool())
+		net.Send(ply)
+	end)
 
 	net.Receive("hg_sunburn_state", function(len, ply)
 		if not hg_badsun:GetBool() then return end
@@ -3123,9 +3133,20 @@ if SERVER then
 end
 
 if CLIENT then
+	local hg_badsun_enabled = false
 	net.Receive("hg_badsun_sound", function()
 		surface.PlaySound("badsun.wav")
 	end)
+	net.Receive("hg_badsun_state", function()
+		hg_badsun_enabled = net.ReadBool()
+	end)
+	function hg_BadSunEnabled()
+		local cv = GetConVar("hg_badsun")
+		if cv then
+			return cv:GetBool() or hg_badsun_enabled
+		end
+		return hg_badsun_enabled
+	end
 end
 
 if CLIENT then
