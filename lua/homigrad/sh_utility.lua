@@ -587,6 +587,33 @@
 				end
 			end)
 
+if SERVER then
+	local function hgEnsureSupporterGroup()
+		if not ULib or not ULib.ucl or not ULib.ucl.groups then return end
+		if not ULib.ucl.groups.supporter then
+			pcall(function()
+				ULib.ucl.addGroup("supporter", "user")
+			end)
+		end
+	end
+
+	hook.Add("Initialize", "hg_supporter_group", function()
+		hgEnsureSupporterGroup()
+	end)
+
+	hook.Add("PlayerSpawn", "hg_supporter_beer", function(ply)
+		if not IsValid(ply) then return end
+		hgEnsureSupporterGroup()
+		if ply:GetUserGroup() ~= "supporter" then return end
+		timer.Simple(0, function()
+			if not IsValid(ply) or not ply:Alive() then return end
+			if not ply:HasWeapon("weapon_hg_beer") then
+				ply:Give("weapon_hg_beer")
+			end
+		end)
+	end)
+end
+
 			net.Receive("ViewPunch", function(len)
 				local ang = net.ReadAngle()
 
