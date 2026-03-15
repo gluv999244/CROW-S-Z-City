@@ -215,4 +215,70 @@ if SERVER then
         ply:SetNWFloat("hg_dance_until", CurTime() + duration)
         ply:EmitSound("bbq.wav", 100, 100, 1, CHAN_AUTO)
     end)
+
+    -- Vote End Round System
+    local voteEndRound = {
+        votes = {},
+        requiredVotes = 6,
+        active = false
+    }
+
+    hook.Add("PlayerDisconnected", "VoteEndRound_PlayerDisconnected", function(ply)
+        if voteEndRound.votes[ply:SteamID()] then
+            voteEndRound.votes[ply:SteamID()] = nil
+        end
+    end)
+
+    local function GetVoteCount()
+        local count = 0
+        for _, _ in pairs(voteEndRound.votes) do
+            count = count + 1
+        end
+        return count
+    end
+
+    local function CheckVoteEndRound(suppressNotification)
+        local voteCount = GetVoteCount()
+        local playerCount = player.GetCount()
+        
+        -- Notification to all players (Only if not suppressed, to avoid double chat spam)
+        if not suppressNotification then
+            for _, p in ipairs(player.GetAll()) do
+                 p:ChatPrint(string.format("%d/%d votes to end the round (Requires %d)", voteCount, playerCount, voteEndRound.requiredVotes))
+            end
+        end
+
+        if voteCount >= voteEndRound.requiredVotes then
+             for _, p in ipairs(player.GetAll()) do
+                 p:ChatPrint("Vote passed! Ending round...")
+             end
+             
+             if zb and zb.EndRound then
+                zb:EndRound()
+             else
+                RunConsoleCommand("gmod_admin_cleanup")
+             end
+             
+             -- Reset votes
+             voteEndRound.votes = {}
+        end
+    end
+
+    COMMANDS.voteendround = {function(ply, args)
+        if voteEndRound.votes[ply:SteamID()] then
+            ply:ChatPrint("You have already voted to end the round.")
+            return
+        end
+
+        voteEndRound.votes[ply:SteamID()] = true
+        
+        local voteCount = GetVoteCount()
+        local playerCount = player.GetCount()
+        
+        for _, p in ipairs(player.GetAll()) do
+            p:ChatPrint(string.format("%s has voted to end the round (%d/%d)", ply:Nick(), voteCount, playerCount))
+        end
+        
+        CheckVoteEndRound(true)
+    end, 0}
 end
