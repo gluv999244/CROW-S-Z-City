@@ -88,7 +88,7 @@ function SWEP:ThinkAdd()
 	self.HoldPos = LerpVector(self.drinkLerp, self.BaseHoldPos, self.DrinkHoldPos)
 	self.HoldAng = LerpAngle(self.drinkLerp, self.BaseHoldAng, self.DrinkHoldAng)
 
-	if SERVER and (self:GetDrinkProgress() or 0) >= 1 then
+	if SERVER and (self:GetDrinkProgress() or 0) >= 1 and (self.drinkLerp or 0) >= 0.99 then
 		self:DrinkFinish()
 	end
 end

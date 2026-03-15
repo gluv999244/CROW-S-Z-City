@@ -821,3 +821,88 @@ hook.Add("HUDPaint", "hg-aprilfools-fatman", function()
 	surface.DrawTexturedRect(x, y, targetW, targetH)
 	render.SetLightingMode(0)
 end)
+
+local indihome = {
+	nextCheck = 0,
+	activeUntil = 0,
+	startedAt = 0,
+	duration = 0,
+	fadeTime = 1.5,
+	slideTime = 1,
+	guy = CreateMaterial("hg_indi_guy", "UnlitGeneric", {
+		["$basetexture"] = "custom/indianguy",
+		["$vertexcolor"] = "1",
+		["$vertexalpha"] = "1"
+	}),
+	home1 = CreateMaterial("hg_indi_home1", "UnlitGeneric", {
+		["$basetexture"] = "custom/indihome1",
+		["$vertexcolor"] = "1",
+		["$vertexalpha"] = "1"
+	}),
+	home2 = CreateMaterial("hg_indi_home2", "UnlitGeneric", {
+		["$basetexture"] = "custom/indihome2",
+		["$vertexcolor"] = "1",
+		["$vertexalpha"] = "1"
+	})
+}
+
+hook.Add("Think", "hg-aprilfools-indi", function()
+	if not GetGlobalBool("hg_aprilfools", false) then return end
+	local now = CurTime()
+	if now < indihome.nextCheck then return end
+	indihome.nextCheck = now + 6
+	if now < indihome.activeUntil then return end
+	if math.random() <= 0.2 then
+		local duration = SoundDuration("indihome.wav")
+		if not duration or duration <= 0 then
+			duration = 18
+		end
+		indihome.duration = duration
+		indihome.startedAt = now
+		indihome.activeUntil = now + duration + indihome.fadeTime
+		surface.PlaySound("indihome.wav")
+	end
+end)
+
+hook.Add("HUDPaint", "hg-aprilfools-indi", function()
+	local now = CurTime()
+	if now >= indihome.activeUntil or indihome.startedAt <= 0 then return end
+	local elapsed = now - indihome.startedAt
+	local fade = 1
+	if elapsed > indihome.duration then
+		fade = 1 - math.Clamp((elapsed - indihome.duration) / indihome.fadeTime, 0, 1)
+	end
+	local alpha = math.Clamp(255 * fade, 0, 255)
+	local scrW, scrH = ScrW(), ScrH()
+
+	local homeMat
+	if elapsed >= 15 then
+		homeMat = indihome.home2
+	elseif elapsed >= 1 then
+		homeMat = indihome.home1
+	end
+
+	if homeMat then
+		render.SetLightingMode(1)
+		surface.SetMaterial(homeMat)
+		surface.SetDrawColor(255, 255, 255, alpha)
+		surface.DrawTexturedRect(0, 0, scrW, scrH)
+		render.SetLightingMode(0)
+	end
+
+	if elapsed < 1 then
+		local guyH = scrH * 0.55
+		local guyW = guyH * 0.75
+		local slideT = math.Clamp(elapsed / indihome.slideTime, 0, 1)
+		local eased = 1 - (1 - slideT) * (1 - slideT) * (1 - slideT)
+		local startX = scrW + guyW
+		local targetX = scrW - guyW * 0.9
+		local x = Lerp(eased, startX, targetX)
+		local y = (scrH - guyH) * 0.5
+		render.SetLightingMode(1)
+		surface.SetMaterial(indihome.guy)
+		surface.SetDrawColor(255, 255, 255, alpha)
+		surface.DrawTexturedRect(x, y, guyW, guyH)
+		render.SetLightingMode(0)
+	end
+end)
